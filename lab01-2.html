@@ -17,7 +17,7 @@
       mapboxgl.accessToken = 'pk.eyJ1IjoianlhbmcxMjAiLCJhIjoiY211enVzaHdoMDB3NDJ4b3ppYjQxMmpheSJ9.GYRscFDXc97_IWa1Cf9skg';
       // Initialize a Mapbox map inside the html element with the id 'map'
       const mymap = new mapboxgl.Map({
-             container: 'map', // Specifies the container where the map will be displayed.
+             container: 'map', // Specify the container where the map will be displayed.
              //style: 'mapbox://styles/mapbox/standard', // Use the default Mapbox standard style
              //projection: 'globe', // Display the map as a globe since satellite-v9 defaults to Mercator
              center: [-122.351, 47.650], // Set the initial center of the map in Fremont, Seattle using longititude and latitude.
@@ -44,7 +44,7 @@
       // Add fullscreen control for expand the map to full screen
       mymap.addControl(new mapboxgl.FullscreenControl());
 
-      // Add navigation control for zoom in/out and adjust the map orientation
+      // Add navigation control for zoom in/out and map orientation control
       mymap.addControl(new mapboxgl.NavigationControl());
 
 </script>
