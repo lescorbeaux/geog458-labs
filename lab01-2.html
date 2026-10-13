@@ -15,17 +15,38 @@
    <div id='map'></div>
    <script>
       mapboxgl.accessToken = 'pk.eyJ1IjoianlhbmcxMjAiLCJhIjoiY211enVzaHdoMDB3NDJ4b3ppYjQxMmpheSJ9.GYRscFDXc97_IWa1Cf9skg';
+      // Initialize a Mapbox map inside the html element with the id 'map'
       const mymap = new mapboxgl.Map({
-             container: 'map',
-             style: 'mapbox://styles/mapbox/dark-v11',
-             projection: 'globe', //Display the map as a globe since satellite-v9 defaults to Mercator
-             center: [-96, 37.8],
-             zoom:1
+             container: 'map', // Specifies the container where the map will be displayed.
+             //style: 'mapbox://styles/mapbox/standard', // Use the default Mapbox standard style
+             //projection: 'globe', // Display the map as a globe since satellite-v9 defaults to Mercator
+             center: [-122.351, 47.650], // Set the initial center of the map in Fremont, Seattle using longititude and latitude.
+             zoom:16 // Set the initial zoom level to 16 for detailed view.
           });
+      
+      // Wait for 'style.load' ensure that style has been loaded before applying map configuration changes.
+      mymap.on('style.load', () => {
+         // Change the light setting from preset to dusk.
+         mymap.setConfigProperty('basemap', 'lightPreset', 'dusk');
+         
+         // Hide points of interest labels, such as restaurants, hotels, and shops.
+         mymap.setConfigProperty('basemap', 'showPointOfInterestLabels', false);
+         
+         // Set showRoadLabels to false to hide road labels and reduce clutter.
+         // This is useful when focusing on neighborhoods and buildings rather than navigating using the map.
+         mymap.setConfigProperty('basemap', 'showRoadLabels', false);
 
+         // Set show3dObjects to true to display buildings and objects in 3D
+         // This is useful when visualizing building heights and observing the urban landscape.
+         mymap.setConfigProperty('basemap', 'show3dObjects', true);
+      });
+
+      // Add fullscreen control for expand the map to full screen
       mymap.addControl(new mapboxgl.FullscreenControl());
+
+      // Add navigation control for zoom in/out and adjust the map orientation
       mymap.addControl(new mapboxgl.NavigationControl());
-// code from the next step will go here!
+
 </script>
 </body>
 </html>
