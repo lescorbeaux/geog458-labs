@@ -9,10 +9,74 @@
     <style>
         body { margin: 0; padding: 0; }
         #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+        #legend {
+            position: absolute;
+            bottom: 30px;
+            left: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+        /* Each row for a magnitude value. */
+        .break {
+            position: relative;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* The circular symbol. */
+        .dot {
+            display: inline-block;
+            margin-top: 5px;
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+
+        /* Label next to the symbol. */
+        .dot-label {
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-style: italic;
+        }
+
+        /* Link color within the legend. */
+        #legend a {
+            color:black;
+        }
    </style>
 </head>
 <body>
    <div id='map'></div>
+   <div id="legend"></div>
+    <script>
+        // Anchor the legend to the HTML element with id="legend".
+        const legend = document.getElementById('legend');
+        const grades = [2, 4.5, 8.5];
+        const radii = [4, 9, 17];
+        const colors = ['#fdd49e', '#d7301f', '#7f0000'];
+        const labels = ['<strong>Magnitude</strong>'];
+
+        for (let i = 0; i < grades.length; i++) {
+            const value = grades[i];
+            const diameter = 2 * radii[i];
+
+            labels.push(
+                '<p class="break"><i class="dot" style="background:' + colors[i] +
+                '; width:' + diameter + 'px; height:' + diameter +
+                'px;"></i> <span class="dot-label" style="top:' +
+                diameter / 2 + 'px;">' + value + '</span></p>'
+            );
+        }
+
+        const source =
+            '<p style="text-align:right; font-size:10pt;">Source: ' +
+            '<a href="https://www.naturalearthdata.com/downloads/10m-cultural-vectors/10m-populated-places/">Natural Earth</a></p>';
+
+        legend.innerHTML = labels.join('') + source;
+    </script>
    <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoianlhbmcxMjAiLCJhIjoiY211enVzaHdoMDB3NDJ4b3ppYjQxMmpheSJ9.GYRscFDXc97_IWa1Cf9skg';
         const mymap = new mapboxgl.Map({
@@ -38,14 +102,40 @@
                 type: 'circle',
                 source: 'population',
                 paint: {
-                    'circle-radius': 5,
-                    'circle-color': '#FF0000',
+                    'circle-radius': [
+                        'step',
+                        ['get', 'population'], 
+                        3,
+                        412969, 5,
+                        1733847, 7,
+                        4931604, 10,
+                        10381289, 14
+                    ],
+                    'circle-color': [
+                        'step',
+                        ['get', 'population'], 
+                        '#d7e6f4',
+                        412969, '#c8dcf0',
+                        1733847, '#73b2d8',
+                        4931604, '#2979b9',
+                        10381289, '#08306b'
+                    ],
                     'circle-stroke-width': 1,
-                    'circle-stroke-color': '#FFFFFF'
+                    'circle-stroke-color': 'white'
                 }
-            })
+            });
 
 
+
+            mymap.on('click', 'cities_layer', (event) => {
+                const feature = event.features[0];
+                const coordinates = feature.geometry.coordinates.slice(0, 2);
+
+                new mapboxgl.Popup()
+                    .setLngLat(coordinates)
+                    .setHTML(`<strong>City:</strong> ${feature.properties.city}`)
+                    .addTo(mymap);
+            });
 
         })
 
