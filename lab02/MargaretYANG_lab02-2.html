@@ -9,6 +9,16 @@
     <style>
         body { margin: 0; padding: 0; }
         #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+        #map-title {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+        }
         #legend {
             position: absolute;
             bottom: 30px;
@@ -51,6 +61,7 @@
 </head>
 <body>
    <div id='map'></div>
+   <div id="map-title">World Cities Populations with Megacities</div>
    <div id="legend"></div>
     <script>
         // Anchor the legend to the HTML element with id="legend".
@@ -60,7 +71,7 @@
         const colors = ['#d7e6f4', '#c8dcf0', '#73b2d8', '#2979b9', '#08306b'];
         const labels = ['<strong>Population</strong>'];
 
-        for (let i = 0; i < grades.length; i++) {
+        for (let i = 0; i < grades.length; i++) { // Loop through the grades to create legend entries for each population range
             const value = grades[i];
             const diameter = 2 * radii[i];
 
@@ -72,7 +83,7 @@
             );
         }
 
-        labels.push(
+        labels.push( // Legend entry for megacities (pop >= 10M)
             '<p class="break"><i class="dot" style="background: #d7301f;' +
             'width: 26px; height: 26px; border: 2px solid black;"></i>'+
             '<span class = "dot-label">Megacities (10M+)</span></p>'
@@ -94,51 +105,53 @@
             zoom: 1
         });
         
-         mymap.on('style.load', () => {
+        mymap.on('style.load', () => {
             mymap.setFog({});
         });
 
         mymap.on('load', () => {
-            mymap.addSource('population', {
+            mymap.addSource('population', { // Loading the population data from geojason file
                 type: 'geojson',
-                data: 'data/world-cities.geojson'
+                data: 'data/world-cities.geojson' 
             });
 
+            // I use Natural Breaks (Jenks) classification to represent world cities populations, because it performs natural groupings of data by minimizing variance within classes and maximizing variance between classes. This is effective for visualizing population data, making it clearer to identify patterns and trends. I used QGIS to classify the data. I used graduate circle sizes and sequential blue color scheme to represent the population range.
             mymap.addLayer({
                 id: 'cities_layer',
                 type: 'circle',
                 source: 'population',
                 paint: {
-                    'circle-radius': [
+                    'circle-radius': [ // Natural Breaks classification for population range
                         'step',
                         ['get', 'population'], 
-                        3,
+                        3, // Default radius for population < 412,969
                         412969, 5,
                         1733847, 7,
                         4931604, 10,
-                        10381289, 14
+                        10381289, 14 // Larger circles for larger population
                     ],
-                    'circle-color': [
+                    'circle-color': [ // Sequential blue color scheme for population range
                         'step',
                         ['get', 'population'], 
-                        '#d7e6f4',
+                        '#d7e6f4', // Lighter blue for smaller population
                         412969, '#c8dcf0',
                         1733847, '#73b2d8',
                         4931604, '#2979b9',
-                        10381289, '#08306b'
+                        10381289, '#08306b' // Darker blue for larger population
                     ],
                     'circle-stroke-width': 1,
                     'circle-stroke-color': 'white'
                 }
             });
 
+            // I added a separate layer for megacities (pop >= 10M). By using a contrasting red color and a black outline, the megacities stand out against other blue circles (cities) on the map.
             mymap.addLayer({
                 id: 'megacities',
                 type: 'circle',
                 source: 'population',
                 filter: ['>=', ['get', 'population'], 10000000],
                 paint: {
-                    'circle-radius': 13,
+                    'circle-radius': 13, // Slightly smaller than the largest circle in cities_layer
                     'circle-color': '#d7301f',
                     'circle-stroke-color': 'black',
                     'circle-stroke-width': 2
@@ -149,6 +162,7 @@
                 const feature = event.features[0];
                 const coordinates = feature.geometry.coordinates.slice(0, 2);
 
+                // Create a pop-up with city name and population when a city circle is clicked.
                 new mapboxgl.Popup()
                     .setLngLat(coordinates)
                     .setHTML(`
@@ -157,9 +171,7 @@
                     `)
                     .addTo(mymap);
             });
-
         })
-
 
     </script>
 </body>
