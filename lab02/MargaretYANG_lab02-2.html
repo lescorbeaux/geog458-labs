@@ -151,7 +151,10 @@
 
                 new mapboxgl.Popup()
                     .setLngLat(coordinates)
-                    .setHTML(`<strong>City:</strong> ${feature.properties.city}`)
+                    .setHTML(`
+                        <strong>City:</strong> ${feature.properties.city}<br>
+                        <strong>Population:</strong> ${feature.properties.population}
+                    `)
                     .addTo(mymap);
             });
 
