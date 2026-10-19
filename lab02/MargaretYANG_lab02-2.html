@@ -14,10 +14,11 @@
             bottom: 30px;
             left: 10px;
             background-color: rgba(255, 255, 255, 0.8);
-            padding: 10px;
+            width: 200px;
+            padding: 20px;
             border-radius: 5px;
             font-family: Arial, sans-serif;
-            font-size: 12px;
+            font-size: 13px;
         }
         /* Each row for a magnitude value. */
         .break {
@@ -54,10 +55,10 @@
     <script>
         // Anchor the legend to the HTML element with id="legend".
         const legend = document.getElementById('legend');
-        const grades = [2, 4.5, 8.5];
-        const radii = [4, 9, 17];
-        const colors = ['#fdd49e', '#d7301f', '#7f0000'];
-        const labels = ['<strong>Magnitude</strong>'];
+        const grades = ['15001 - 412968', '412969 - 1733846', '1733847 - 4931603', '4931604 - 10381288', '10381289 - 31480498'];
+        const radii = [3, 5, 7, 10, 14];
+        const colors = ['#d7e6f4', '#c8dcf0', '#73b2d8', '#2979b9', '#08306b'];
+        const labels = ['<strong>Population</strong>'];
 
         for (let i = 0; i < grades.length; i++) {
             const value = grades[i];
