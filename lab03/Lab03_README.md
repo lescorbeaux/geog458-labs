@@ -28,5 +28,5 @@ Unlike the guided PM2.5 map, the independent map does not use interpolation. Ins
 The thematic raster and geojson vector layer represent the same 50 acre hexagons but serve different purposes. The raster displays the geographic distribution of tree canopy coverage, while the vector layer provides access to the original attribute data, offers a complete and broader view of tree canopy patterns.      
 
 I added the geojson polygons as a transparent layer above the raster, allowing users to click individual hexagons to view their grid IDs, canopy percentages for 2016 and 2021, and changes in percentage points. The map also includes a matching legend and separate controls for toggling the thematic raster and interactive vector layer.
-### Raster Tile Export
+## Raster Tile Export
 Both basemaps and thematic raster layers were exported separately using QMetaTiles in QGIS, following the lab instructions. The exports used zoom levels 8-12, 256 x 256 pixels PNG tiles, and the XYZ tile scheme. The project CRS was set to EPSG:3857. The guided map covers the central Puget Sound region, while the indepedent map covers City of Seattle. The thematic layers were exported with 100% transparent backgrounds to allow them to overlay the basemaps.
