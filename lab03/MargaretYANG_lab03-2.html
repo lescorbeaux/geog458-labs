@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lab 3: Puget Sound PM2.5</title>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
+  <style>
+    body { margin: 0; font: 14px/1.5 Arial, sans-serif; color: #182e3a; }
+    #map { position: absolute; inset: 0; }
+    #panel { position: absolute; top: 12px; left: 12px; padding: 16px;
+      width: 260px; max-width: calc(100% - 100px); background: white;
+      max-height: calc(100% - 80px); overflow: auto; border-radius: 6px; }
+    h1 { margin: 0 0 8px; font-size: 19px; }
+    p { margin: 8px 0; }
+    .ramp { height: 14px; background: linear-gradient(to right,
+      #ffffcc, #c2e699, #78c679, #31a354, #006837); }
+    .values { display: flex; justify-content: space-between; }
+    .maplibregl-popup-content { white-space: pre-line; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <section id="panel">
+    <h1>Seattle Tree Canopy Coverage (2021)</h1>
+    <p>June 29, 2023 | Seattle GeoData</p>
+    <p id="status">Click a hexagon to explore tree canopy coverage and changes from 2016-2021.</p>
+    <div id="surface-control" hidden>
+      <label><input id="show-surface" type="checkbox" checked> Show tree canopy coverage</label>
+    </div>
+    <div id="trees-control" hidden>
+      <label><input id="show-trees" type="checkbox" checked> Show interactive hexagons</label>
+    </div>
+    <div id="legend" hidden>
+      <p><strong>Tree Canopy Coverage (%)</strong></p>
+      <div class="ramp"></div>
+      <div class="values"><span>0%</span><span>38%</span><span>94%</span></div>
+      <p> 2021 tree canopy coverage by 50-acre hexagon, classfied using Jenks Natural Breaks</p>
+    </div>
+  </section>
+
+  <script type="module">
+    import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+
+    const map = new maplibregl.Map({
+        container: 'map',
+        style: {
+            version: 8,
+            sources: {},
+            layers: [{ id: 'background', type: 'background',
+            paint: { 'background-color': '#edf1f0' } }]
+        },
+        center: [-122.3321, 47.6062],
+        zoom: 10,
+        minZoom: 8,
+        maxZoom: 12,
+        maxBounds: [[-122.75, 47.10], [-122.05, 48.15]]
+    });
+    map.addControl(new maplibregl.NavigationControl());
+    map.addControl(new maplibregl.ScaleControl({ unit: 'metric' }));
+
+    map.on('error', (event) => {
+        document.getElementById('status').textContent =
+            'Load error: check the file path and browser Console.';
+        console.error(event.error);
+    });
+
+    map.on('load', () => {
+        // Step 2: Insert the basmap raster tiles.
+        map.addSource('basemap-tiles', {
+            type: 'raster',
+            tiles: ['assets/basemap_independent/{z}/{x}/{y}.png'],
+            tileSize: 256,
+            scheme: 'xyz',
+            minzoom: 8,
+            maxzoom: 12,
+            bounds: [-122.75, 47.10, -122.05, 48.15],
+            attribution: '© Mapbox © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        });
+        
+        map.addLayer({
+            id: 'basemap',
+            type: 'raster',
+            source: 'basemap-tiles',
+            paint: { 'raster-opacity': 1, 'raster-fade-duration': 0 }
+        });
+
+
+        // Step 3: Add the 2021 Seattle tree canopy coverage raster tiles.
+        map.addSource('tree-tiles', {
+            type: 'raster',
+            tiles: ['assets/tree_independent/{z}/{x}/{y}.png'],
+            tileSize: 256,
+            scheme: 'xyz',
+            minzoom: 8,
+            maxzoom: 12,
+            bounds: [-122.75, 47.10, -122.05, 48.15],
+            attribution: 'Seattle Tree Canopy 2016 2021 50 Acre Hexagons, 2023-06-29; Map by Margaret Yang'
+        });
+        map.addLayer({
+            id: 'tree-surface',
+            type: 'raster',
+            source: 'tree-tiles',
+            paint: { 'raster-opacity': 0.7, 'raster-fade-duration': 0 }
+        });
+
+        document.getElementById('surface-control').hidden = false;
+        document.getElementById('legend').hidden = false;
+        document.getElementById('show-surface').addEventListener('change', (event) => {
+        map.setLayoutProperty('tree-surface', 'visibility',
+            event.target.checked ? 'visible' : 'none');
+        document.getElementById('legend').hidden = !event.target.checked;
+        });
+
+        // Step 4: Insert the tree canopy geojson and interactive popup code.
+        map.addSource('tree-data', {
+            type: 'geojson',
+            data: 'data/seattletree_50ac_hex.geojson'
+        });
+        map.addLayer({
+            id: 'trees',
+            type: 'fill',
+            source: 'tree-data',
+            paint: {
+                'fill-color': '#ffffff',
+                'fill-opacity': 0
+            }
+        });
+
+        map.on('click', 'trees', (event) => {
+            const feature = event.features[0];
+            const tree = feature.properties;
+            new maplibregl.Popup()
+                .setLngLat(event.lngLat)
+                .setText([
+                    'Grid ID: ' + tree.GRID_ID,
+                    'Tree Canopy % (2021): ' +  Number(tree.TreeCanopy_2021_Percent).toFixed(2) + '%',
+                    'Tree Canopy % (2016): ' +  Number(tree.TreeCanopy_2016_Percent).toFixed(2) + '%',
+                    'Canopy Change %: ' +  Number(tree.Change_Percent_AbsDiff).toFixed(2) + ' percentage points'
+                ].join('\n'))
+                .addTo(map);
+        });
+        map.on('mouseenter', 'trees', () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', 'trees', () => {
+            map.getCanvas().style.cursor = '';
+        });
+        document.getElementById('trees-control').hidden = false;
+        document.getElementById('show-trees').addEventListener('change', (event) => {
+            map.setLayoutProperty('trees', 'visibility',
+                event.target.checked ? 'visible' : 'none');
+        });
+        document.getElementById('status').textContent =
+            'Click a hexagon to explore tree canopy coverage and changes from 2016-2021.';
+
+
+    });
+  </script>
+</body>
+</html>
