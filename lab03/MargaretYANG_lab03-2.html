@@ -85,7 +85,7 @@
             paint: { 'raster-opacity': 1, 'raster-fade-duration': 0 }
         });
 
-
+        
         // Step 3: Add the 2021 Seattle tree canopy coverage raster tiles.
         map.addSource('tree-tiles', {
             type: 'raster',
@@ -111,6 +111,7 @@
             event.target.checked ? 'visible' : 'none');
         document.getElementById('legend').hidden = !event.target.checked;
         });
+
 
         // Step 4: Insert the tree canopy geojson and interactive popup code.
         map.addSource('tree-data', {
