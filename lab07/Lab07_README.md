@@ -1,5 +1,6 @@
 # GEOG 458 Lab 07: Geo-Narrative: Build a Storymap
 ## Margaret Yang
+[Tourist Guide to Père Lachaise](https://lescorbeaux.github.io/geog458-labs/lab07/index.html)
 
 ## 1. How **chapter**, **index**, **chapter.id**, and **data-index** connect the configuration to HTML section
 In the *forEach()* loop, **chapter** represents the current chapter object in *config.chapters*, while **index** represents its position in the array, starting from 0. **chapter.id** provides a unique ID for each HTML section, and **data-index** stores its corresponding position in the array. This allows JavaScript to identify each section and connect it to the correct chapter information in *config.js*.
